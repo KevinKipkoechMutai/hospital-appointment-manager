@@ -5,6 +5,8 @@ import { users } from "../appwrite.config"
 export const createUser = async (user: CreateUserParams) => {
   try {
     // Create new user -> https://appwrite.io/docs/references/1.5.x/server-nodejs/users#create
+    // console.log('Creating user with:', user)
+    console.log('Users client:', users)
     const newuser = await users.create(
       ID.unique(),
       user.email,
@@ -13,7 +15,7 @@ export const createUser = async (user: CreateUserParams) => {
       user.name
     );
     
-
+    console.log(newuser)
     return parseStringify(newuser);
   } catch (error: any) {
     // Check existing user
