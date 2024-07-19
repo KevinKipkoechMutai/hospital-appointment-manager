@@ -14,7 +14,7 @@ export default function Home() {
           src="/assets/icons/logo-full.svg"
           alt="patient"
           width={1000}
-          height={100}
+          height={1000}
           className="mb-12 h-10 w-fit"
         />
         <PatientForm/>
