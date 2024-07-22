@@ -1,42 +1,35 @@
 import * as sdk from "node-appwrite";
-// import dotenv from "dotenv";
+import dotenv from "dotenv";
 
-// dotenv.config();
+// Load environment variables
+dotenv.config();
 
-// export const { 
-//     PROJECT_ID, 
-//     API_KEY, 
-//     PATIENT_COLLECTION_ID, 
-//     DOCTOR_COLLECTION_ID, 
-//     APPOINTMENT_COLLECTION_ID, 
-//     NEXT_PUBLIC_BUCKET_ID: BUCKET_ID, 
-//     NEXT_PUBLIC_ENDPOINT: ENDPOINT 
-// } = process.env
+// Access environment variables
+const endpoint = process.env.NEXT_PUBLIC_ENDPOINT; // Use `NEXT_PUBLIC_` for client-side
+const projectID = process.env.PROJECT_ID; // Server-side
+const apiKey = process.env.API_KEY; // Server-side
 
-// if (!process.env.NEXT_PUBLIC_ENDPOINT) {
-//     console.log(ENDPOINT)
-//     throw new Error("ENDPOINT environment variable is not correctly set");
-    
-// }
+// Debugging: Log environment variables to ensure they are loaded correctly
+if (typeof window === "undefined") {
+  // This will log only on the server side
+  console.log("Endpoint:", endpoint);
+  console.log("Project ID:", projectID);
+  console.log("API Key Length:", apiKey ? apiKey.length : 'undefined');
+}
 
-// if (!process.env.PROJECT_ID) {
-//     throw new Error("PROJECT_ID environment variable not correctly set");
-// }
+// Check if any environment variable is missing
+if (!endpoint || !projectID || !apiKey) {
+  throw new Error("Missing required environment variables");
+}
 
-// if (!process.env.API_KEY) {
-//     throw new Error("API_KEY environment variable not correctly set");
-// }
-
-const endpoint = process.env.NEXT_PUBLIC_ENDPOINT         //NOW PUBLIC
-const projectID = process.env.PROJECT_ID //NOW PUBLIC
-const apiKey = process.env.API_KEY
+// Initialize the Appwrite client
 const client = new sdk.Client();
-
 client
-    .setEndpoint(endpoint!)
-    .setProject(projectID!)
-    .setKey(apiKey!)
-    
+  .setEndpoint(endpoint) // Set your Appwrite Endpoint
+  .setProject(projectID) // Set your project ID
+  .setKey(apiKey); // Set your API key
+
+// Export Appwrite services
 export const databases = new sdk.Databases(client);
 export const storage = new sdk.Storage(client);
 export const messaging = new sdk.Messaging(client);
