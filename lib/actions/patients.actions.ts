@@ -2,7 +2,8 @@
 
 import { ID, Query } from "node-appwrite"
 import { parseStringify } from "../utils"
-import { users } from "../appwrite.config"
+import { databases, storage, users } from "../appwrite.config"
+import { InputFile } from "node-appwrite/file"
 
 export const createUser = async (user: CreateUserParams) => {
   try {
@@ -47,8 +48,25 @@ export const registerPatient = async ({ identificationDocument, ...patient }: Re
     let file
 
     if (identificationDocument) {
-      
+      const inputFile = InputFile.fromBuffer(
+        identificationDocument?.get('blobFile') as Blob,
+        identificationDocument?.get('fileName') as string
+      )
+      file = await storage.createFile(process.env.BUCKET_ID!, ID.unique(), inputFile)
     }
+
+    const newPatient = await databases.createDocument(
+      process.env.DATABASE_ID!,
+      process.env.PATIENT_COLLECTION_ID!,
+      ID.unique(),
+      {
+        identificationDocumentId: file?.$id || null,
+        identificationDocumentUrl: `${process.env.ENDPOINT}/storage/buckets/${process.env.BUCKET_ID}/files/${file?.$id}/view?project=${process.env.PROJECT_ID}`,
+        ...patient
+      }
+    )
+
+    return parseStringify(newPatient)
   } catch (error) {
     console.log(error)
   }
