@@ -9,14 +9,6 @@ const endpoint = process.env.NEXT_PUBLIC_ENDPOINT; // Use `NEXT_PUBLIC_` for cli
 const projectID = process.env.PROJECT_ID; // Server-side
 const apiKey = process.env.API_KEY; // Server-side
 
-// Debugging: Log environment variables to ensure they are loaded correctly
-if (typeof window === "undefined") {
-  // This will log only on the server side
-  console.log("Endpoint:", endpoint);
-  console.log("Project ID:", projectID);
-  console.log("API Key Length:", apiKey ? apiKey.length : 'undefined');
-}
-
 // Check if any environment variable is missing
 if (!endpoint || !projectID || !apiKey) {
   throw new Error("Missing required environment variables");
