@@ -52,7 +52,7 @@ export const registerPatient = async ({ identificationDocument, ...patient }: Re
         identificationDocument?.get('blobFile') as Blob,
         identificationDocument?.get('fileName') as string
       )
-      file = await storage.createFile(process.env.BUCKET_ID!, ID.unique(), inputFile)
+      file = await storage.createFile(process.env.NEXT_PUBLIC_BUCKET_ID!, ID.unique(), inputFile)
     }
 
     const newPatient = await databases.createDocument(
