@@ -1,4 +1,4 @@
-export const GenderOptions = ["Male", "Female", "Other"];
+export const GenderOptions = ["male", "female", "other"];
 
 type Gender = {
     
@@ -10,7 +10,7 @@ export const PatientFormDefaultValues = {
   email: "",
   phone: "",
   birthDate: new Date(Date.now()),
-  gender: "Male" as Gender,
+  gender: "male" as Gender,
   address: "",
   occupation: "",
   emergencyContactName: "",
@@ -25,9 +25,9 @@ export const PatientFormDefaultValues = {
   identificationType: "Birth Certificate",
   identificationNumber: "",
   identificationDocument: [],
-  treatmentConsent: false,
-  disclosureConsent: false,
-  privacyConsent: false,
+  treatmentConsent: null,
+  disclosureConsent: null,
+  privacyConsent: null,
 };
 
 export const IdentificationTypes = [

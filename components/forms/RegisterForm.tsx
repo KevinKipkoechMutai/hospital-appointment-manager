@@ -28,7 +28,7 @@ const RegisterForm = ({ user }: { user: User }) => {
   const [isLoading, setIsLoading] = useState(false)
   
   const form = useForm<z.infer<typeof UserFormValidation>>({
-    resolver: zodResolver(UserFormValidation),
+    resolver: zodResolver(PatientFormValidation),
     defaultValues: {
       ...PatientFormDefaultValues,
       name: "",
@@ -38,8 +38,9 @@ const RegisterForm = ({ user }: { user: User }) => {
   })
 
   const onSubmit = async (values: z.infer<typeof PatientFormValidation>) => {
+    // console.log("Form submitted: ", values)
     setIsLoading(true);
-
+    
     let formData
 
     if (values.identificationDocument && values.identificationDocument.length > 0) {
@@ -55,7 +56,7 @@ const RegisterForm = ({ user }: { user: User }) => {
       const patientData = {
         ...values,
         userId: user.$id,
-        birthData: new Date(values.birthDate),
+        birthDate: new Date(values.birthDate),
         identificationDocument: formData,
       }
 
