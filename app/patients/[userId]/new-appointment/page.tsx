@@ -1,8 +1,11 @@
 import AppointmentForm from "@/components/forms/AppointmentForm";
+import { getPatient } from "@/lib/actions/patients.actions";
 import Image from "next/image";
 
 
-export default function NewAppointment({ params: { userId } }: SearchParamProps) {
+export default async function NewAppointment({ params: { userId } }: SearchParamProps) {
+  const patient = await getPatient(userId)
+
   return (
    <div className="flex h-screen max-h-screen">
     {/*TODO: Passkey modal OTP Verification*/}
@@ -18,8 +21,9 @@ export default function NewAppointment({ params: { userId } }: SearchParamProps)
         <AppointmentForm
             type="create"
             userId={userId}
+            patientId={patient.$id}
         />
-        <p className="justify-items-end text-dark-600 xl:text-left">&copy; 2024 CarePulse</p>
+        <p className="copyright mt-10 py-12">&copy; 2024 CarePulse</p>
           
       </div>
     </section>
