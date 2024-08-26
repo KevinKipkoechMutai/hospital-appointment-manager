@@ -7,13 +7,14 @@ import { Form } from "../ui/form"
 import CustomFormField from "../CustomFormField"
 import SubmitButton from "../SubmitButton"
 import { useState } from "react"
-import { AppointmentFormValidation, CreateAppointmentSchema } from "@/lib/validation"
+import { getAppointmentSchema } from "@/lib/validation"
 import { useRouter } from "next/navigation"
 import { createUser } from "@/lib/actions/patients.actions"
 import { FormFieldType } from "./PatientForm"
 import { Doctors } from "@/constants"
 import Image from "next/image"
 import { SelectItem } from "../ui/select"
+import { createAppointment } from "@/lib/actions/appointment.actions"
 
 
 
@@ -26,6 +27,8 @@ const AppointmentForm = ({ type, userId, patientId }: {
 
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+
+  const AppointmentFormValidation = getAppointmentSchema(type)
 
   const form = useForm<z.infer<typeof AppointmentFormValidation>>({
     resolver: zodResolver(AppointmentFormValidation),
@@ -62,13 +65,17 @@ const AppointmentForm = ({ type, userId, patientId }: {
           patient: patientId,
           primaryPhysician: values.primaryPhysician,
           schedule: new Date(values.schedule),
-          reason: values.reason,
+          reason: values.reason!,
           note: values.note,
           status: status as Status
         }
-      }
+        const appointment = await createAppointment(appointmentData)
 
-      // const appointment = await createAppointment(appointmentData)
+        if (appointment) {
+          form.reset()
+          router.push(`/patients/${userId}/new-appointment/success?appointmentId=${appointment.$id}`)
+        }
+      }
 
     } catch (error) {
       console.log(error);
