@@ -9,7 +9,7 @@ const endpoint = process.env.NEXT_PUBLIC_ENDPOINT; // Use `NEXT_PUBLIC_` for cli
 const projectID = process.env.PROJECT_ID; // Server-side
 const apiKey = process.env.API_KEY; // Server-side
 
-// Check if any environment variable is missing
+// // Check if any environment variable is missing
 if (!endpoint || !projectID || !apiKey) {
   throw new Error("Missing required environment variables");
 }
