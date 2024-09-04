@@ -2,26 +2,28 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { string, z } from "zod"
+import { z } from "zod"
 import { Form } from "../ui/form"
 import CustomFormField from "../CustomFormField"
 import SubmitButton from "../SubmitButton"
-import { useState } from "react"
+import { Dispatch, SetStateAction, useState } from "react"
 import { getAppointmentSchema } from "@/lib/validation"
 import { useRouter } from "next/navigation"
-import { createUser } from "@/lib/actions/patients.actions"
 import { FormFieldType } from "./PatientForm"
 import { Doctors } from "@/constants"
 import Image from "next/image"
 import { SelectItem } from "../ui/select"
-import { createAppointment } from "@/lib/actions/appointment.actions"
+import { createAppointment, updateAppointment } from "@/lib/actions/appointment.actions"
+import { Appointment } from "@/types/appwrite.types"
 
 
 
-const AppointmentForm = ({ type, userId, patientId }: {
+const AppointmentForm = ({ type = "create", userId, patientId, appointment, setOpen }: {
   type: "create" | "cancel" | "schedule";
   userId: string;
-  patientId: string
+  patientId: string;
+  appointment?: Appointment;
+  setOpen?: Dispatch<SetStateAction<boolean>>
 }) => {
 
 
@@ -34,15 +36,17 @@ const AppointmentForm = ({ type, userId, patientId }: {
     resolver: zodResolver(AppointmentFormValidation),
     defaultValues: {
       primaryPhysician: "",
-      schedule: new Date(),
-      reason: "",
-      note: "",
-      cancellationReason: "",
+      schedule: appointment ? new Date(appointment?.schedule) : new Date(Date.now()),
+      reason: appointment ? appointment.reason : "",
+      note: appointment?.note || "",
+      cancellationReason: appointment?.cancellationReason || "",
     }
   })
 
   const onSubmit = async (values: z.infer<typeof AppointmentFormValidation>) => {
     setIsLoading(true);
+
+    console.log('I am submiting')
 
     let status
     switch (type) {
@@ -60,7 +64,7 @@ const AppointmentForm = ({ type, userId, patientId }: {
     try {
 
       if (type === "create" && patientId) {
-        const appointmentData = {
+        const appointment = {
           userId,
           patient: patientId,
           primaryPhysician: values.primaryPhysician,
@@ -69,11 +73,30 @@ const AppointmentForm = ({ type, userId, patientId }: {
           note: values.note,
           status: status as Status
         }
-        const appointment = await createAppointment(appointmentData)
+        const newAppointment = await createAppointment(appointment)
 
-        if (appointment) {
+        if (newAppointment) {
           form.reset()
           router.push(`/patients/${userId}/new-appointment/success?appointmentId=${appointment.$id}`)
+        
+        } else {
+          const appointmentToUpdate = {
+            userId,
+            appointmentId: appointment?.$id,
+            appointment: {
+              primaryPhysician: values.primaryPhysician,
+              schedule: new Date(values?.schedule),
+              status: status as Status,
+              cancellationReason: values?.cancellationReason
+            }
+          }
+
+          const updatedAppointment = await updateAppointment(appointmentToUpdate)
+
+          if (updatedAppointment) {
+            setOpen && setOpen(false)
+            form.reset()
+          }
         }
       }
 
@@ -104,10 +127,13 @@ const AppointmentForm = ({ type, userId, patientId }: {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 flex-1">
-        <section className="mb-12 space-y-4">
-          <h1 className="header">New Appointment</h1>
-          <p className="text-dark-700">Request a new appointment in 10 seconds.</p>
-        </section>
+        {
+          type === 'create' && 
+          <section className="mb-12 space-y-4">
+            <h1 className="header">New Appointment</h1>
+            <p className="text-dark-700">Request a new appointment in 10 seconds.</p>
+          </section>
+        }
 
         {type !== "cancel" && (
           <>
