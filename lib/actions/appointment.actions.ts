@@ -2,8 +2,9 @@
 
 import { ID, Query } from "node-appwrite"
 import { databases } from "../appwrite.config"
-import { parseStringify } from "../utils"
+import { formatDateTime, parseStringify } from "../utils"
 import { Appointment } from "@/types/appwrite.types"
+import { revalidatePath } from "next/cache"
 
 
 export const createAppointment = async (appointment: CreateAppointmentParams) => {
@@ -70,5 +71,51 @@ export const getRecentAppointmentList = async () => {
 
     } catch (error) {
         console.log(error)
+    }
+}
+
+// export const sendSMSNotification = async (userId: string, content: string) => {
+//     try {
+//       // https://appwrite.io/docs/references/1.5.x/server-nodejs/messaging#createSms
+//       const message = await messaging.createSms(
+//         ID.unique(),
+//         content,
+//         [],
+//         [userId]
+//       );
+//       return parseStringify(message);
+//     } catch (error) {
+//       console.error("An error occurred while sending sms:", error);
+//     }
+//   }
+  
+
+export const updateAppointment = async (
+    {
+        appointmentId,
+        userId,
+        timeZone,
+        appointment,
+        type,
+    }: UpdateAppointmentParams
+) => {
+    try {
+        const updatedAppointment = await databases.updateDocument(
+            process.env.DATABASE_ID!,
+            process.env.APPOINTMENT_COLLECTION_ID!,
+            appointmentId,
+            appointment
+        )
+
+        if (!updatedAppointment) throw Error;
+
+        const smsMessage = `Greetings from CarePulse. ${type === "schedule" ? `Your appointment is confirmed for ${formatDateTime(appointment.schedule!, timeZone).dateTime} with Dr. ${appointment.primaryPhysician}` : `We regret to inform that your appointment for ${formatDateTime(appointment.schedule!, timeZone).dateTime} is cancelled. Reason:  ${appointment.cancellationReason}`}.`;
+        // await sendSMSNotification(userId, smsMessage)
+
+        revalidatePath('/admin')
+        return parseStringify(updatedAppointment)
+
+    } catch (error) {
+        console.error("An error occured while scheduling an appointment.")
     }
 }
