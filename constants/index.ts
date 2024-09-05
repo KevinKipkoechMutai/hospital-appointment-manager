@@ -5,8 +5,7 @@ type Gender = {
 }
 
 export const PatientFormDefaultValues = {
-  firstName: "",
-  lastName: "",
+  name: "",
   email: "",
   phone: "",
   birthDate: new Date(Date.now()),
@@ -25,9 +24,9 @@ export const PatientFormDefaultValues = {
   identificationType: "Birth Certificate",
   identificationNumber: "",
   identificationDocument: [],
-  treatmentConsent: null,
-  disclosureConsent: null,
-  privacyConsent: null,
+  treatmentConsent: true,
+  disclosureConsent: true,
+  privacyConsent: true,
 };
 
 export const IdentificationTypes = [

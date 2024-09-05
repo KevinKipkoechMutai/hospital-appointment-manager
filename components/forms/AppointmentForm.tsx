@@ -34,19 +34,23 @@ const AppointmentForm = ({ type = "create", userId, patientId, appointment, setO
 
   const form = useForm<z.infer<typeof AppointmentFormValidation>>({
     resolver: zodResolver(AppointmentFormValidation),
-    defaultValues: {
-      primaryPhysician: "",
-      schedule: appointment ? new Date(appointment?.schedule) : new Date(Date.now()),
-      reason: appointment ? appointment.reason : "",
-      note: appointment?.note || "",
-      cancellationReason: appointment?.cancellationReason || "",
-    }
+    defaultValues: type === "cancel"
+    ? {
+        cancellationReason: appointment?.cancellationReason || "None",
+      }
+    : {
+        primaryPhysician: appointment?.primaryPhysician || "",
+        schedule: appointment ? new Date(appointment?.schedule) : new Date(Date.now()),
+        reason: appointment ? appointment.reason : "",
+        note: appointment?.note || "",
+        cancellationReason: appointment?.cancellationReason || "",
+      },
   })
 
   const onSubmit = async (values: z.infer<typeof AppointmentFormValidation>) => {
     setIsLoading(true);
 
-    console.log('I am submiting')
+    // console.log('I am submiting')
 
     let status
     switch (type) {
@@ -67,36 +71,37 @@ const AppointmentForm = ({ type = "create", userId, patientId, appointment, setO
         const appointment = {
           userId,
           patient: patientId,
-          primaryPhysician: values.primaryPhysician,
-          schedule: new Date(values.schedule),
+          primaryPhysician: values?.primaryPhysician!,
+          schedule: new Date(values?.schedule!),
           reason: values.reason!,
           note: values.note,
           status: status as Status
         }
         const newAppointment = await createAppointment(appointment)
-
+        // @ts-ignore
         if (newAppointment) {
           form.reset()
-          router.push(`/patients/${userId}/new-appointment/success?appointmentId=${appointment.$id}`)
+          router.push(`/patients/${userId}/new-appointment/success?appointmentId=${appointment?.$id}`)
         
-        } else {
-          const appointmentToUpdate = {
-            userId,
-            appointmentId: appointment?.$id,
-            appointment: {
-              primaryPhysician: values.primaryPhysician,
-              schedule: new Date(values?.schedule),
-              status: status as Status,
-              cancellationReason: values?.cancellationReason
-            }
-          }
+        }
+      } else {
+        const appointmentToUpdate = {
+          userId,
+          appointmentId: appointment?.$id!,
+          appointment: {
+            primaryPhysician: values.primaryPhysician,
+            schedule: new Date(values?.schedule!),
+            status: status as Status,
+            cancellationReason: values.cancellationReason,
+          },
+          type,
+        }
 
-          const updatedAppointment = await updateAppointment(appointmentToUpdate)
+        const updatedAppointment = await updateAppointment(appointmentToUpdate)
 
-          if (updatedAppointment) {
-            setOpen && setOpen(false)
-            form.reset()
-          }
+        if (updatedAppointment) {
+          setOpen && setOpen(false)
+          form.reset()
         }
       }
 

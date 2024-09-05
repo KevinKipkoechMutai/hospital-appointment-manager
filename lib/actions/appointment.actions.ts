@@ -99,7 +99,18 @@ export const updateAppointment = async (
         type,
     }: UpdateAppointmentParams
 ) => {
+
+    if (type === "cancel" && !appointment.schedule) {
+        delete appointment.schedule;
+    }
+
+    // console.log({
+    //     "appointmentId": appointmentId,
+    //     "appointment": appointment
+    // })
+
     try {
+
         const updatedAppointment = await databases.updateDocument(
             process.env.DATABASE_ID!,
             process.env.APPOINTMENT_COLLECTION_ID!,
@@ -107,15 +118,15 @@ export const updateAppointment = async (
             appointment
         )
 
-        if (!updatedAppointment) throw Error;
+        if (!updatedAppointment) throw new Error("Failed to update appointment")
 
-        const smsMessage = `Greetings from CarePulse. ${type === "schedule" ? `Your appointment is confirmed for ${formatDateTime(appointment.schedule!, timeZone).dateTime} with Dr. ${appointment.primaryPhysician}` : `We regret to inform that your appointment for ${formatDateTime(appointment.schedule!, timeZone).dateTime} is cancelled. Reason:  ${appointment.cancellationReason}`}.`;
+        // const smsMessage = `Greetings from CarePulse. ${type === "schedule" ? `Your appointment is confirmed for ${formatDateTime(appointment.schedule!, timeZone).dateTime} with Dr. ${appointment.primaryPhysician}` : `We regret to inform that your appointment for ${formatDateTime(appointment.schedule!, timeZone).dateTime} is cancelled. Reason:  ${appointment.cancellationReason}`}.`;
         // await sendSMSNotification(userId, smsMessage)
 
         revalidatePath('/admin')
         return parseStringify(updatedAppointment)
 
     } catch (error) {
-        console.error("An error occured while scheduling an appointment.")
+        console.error(`An error occured while ${type === 'schedule' ? 'scheduling' : 'cancelling'} an appointment.`)
     }
 }

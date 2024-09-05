@@ -10,7 +10,7 @@ const Success = async ({ params: { userId }, searchParams }: SearchParamProps) =
 
   const appointmentId = (searchParams?.appointmentId as string) || ''
   const appointment = await getAppointment(appointmentId)
-  const doctor = Doctors.find((doc) => doc.name === appointment.primaryPhysician)
+  const doctor = Doctors.find((doc) => doc.name === appointment?.primaryPhysician)
 
 
   return (
@@ -41,7 +41,7 @@ const Success = async ({ params: { userId }, searchParams }: SearchParamProps) =
               <p>Requested appointment details</p>
               <div className="flex items-center gap-3">
                 <Image
-                  src={doctor?.image}
+                  src={doctor?.image!}
                   alt="doctor"
                   height={100}
                   width={100}
@@ -56,7 +56,7 @@ const Success = async ({ params: { userId }, searchParams }: SearchParamProps) =
                   width={24}
                   alt="calendar"
                 />
-                <p>{formatDateTime(appointment.schedule).dateTime}</p>
+                <p>{formatDateTime(appointment?.schedule).dateTime}</p>
               </div>
             </section>
             <Button

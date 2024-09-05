@@ -33,6 +33,7 @@ const FileUploader = ({ files, onChange }: FileUploaderProps) => {
                 width={40}
                 height={40}
                 alt="upload"
+                priority
                 />
                 <div className="file-upload_label">
                     <p className="text-14-regular">
