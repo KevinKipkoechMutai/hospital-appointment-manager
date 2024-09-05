@@ -45,30 +45,48 @@ export const getUser = async (userId: string) => {
 
 export const registerPatient = async ({ identificationDocument, ...patient }: RegisterUserParams) => {
   try {
-    let file
+    let file;
 
+    // Handle file upload if the identification document is provided
     if (identificationDocument) {
       const inputFile = InputFile.fromBuffer(
         identificationDocument?.get('blobFile') as Blob,
         identificationDocument?.get('fileName') as string
-      )
-      file = await storage.createFile(process.env.NEXT_PUBLIC_BUCKET_ID!, ID.unique(), inputFile)
+      );
+
+      try {
+        // Upload the file and get its ID and URL
+        file = await storage.createFile(process.env.NEXT_PUBLIC_BUCKET_ID!, ID.unique(), inputFile);
+        console.log("File upload successful:", file);
+      } catch (fileUploadError) {
+        console.error("Error uploading file:", fileUploadError);
+        throw new Error("File upload failed");
+      }
     }
 
+    // Prepare patient data for creation
+    const newPatientData = {
+      identificationDocumentId: file?.$id || null,
+      identificationDocumentUrl: file
+        ? `${process.env.ENDPOINT!}/storage/buckets/${process.env.BUCKET_ID!}/files/${file.$id}/view?project=${process.env.PROJECT_ID!}`
+        : null,
+      ...patient,
+    };
+
+    console.log("Creating new patient with data:", newPatientData);
+
+    // Create the patient document in the database
     const newPatient = await databases.createDocument(
       process.env.DATABASE_ID!,
       process.env.PATIENT_COLLECTION_ID!,
       ID.unique(),
-      {
-        identificationDocumentId: file?.$id || null,
-        identificationDocumentUrl: `${process.env.ENDPOINT}/storage/buckets/${process.env.BUCKET_ID}/files/${file?.$id}/view?project=${process.env.PROJECT_ID}`,
-        ...patient
-      }
-    )
+      newPatientData
+    );
 
-    return parseStringify(newPatient)
+    return parseStringify(newPatient);
   } catch (error) {
-    console.log(error)
+    console.error("Error registering patient:", error);
+    throw error; // Re-throw error for handling in the calling function
   }
 }
 
