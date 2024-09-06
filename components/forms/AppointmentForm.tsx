@@ -18,6 +18,7 @@ import { Appointment } from "@/types/appwrite.types"
 
 
 
+
 const AppointmentForm = ({ type = "create", userId, patientId, appointment, setOpen }: {
   type: "create" | "cancel" | "schedule";
   userId: string;
@@ -68,6 +69,7 @@ const AppointmentForm = ({ type = "create", userId, patientId, appointment, setO
     try {
 
       if (type === "create" && patientId) {
+
         const appointment = {
           userId,
           patient: patientId,
@@ -81,7 +83,7 @@ const AppointmentForm = ({ type = "create", userId, patientId, appointment, setO
         // @ts-ignore
         if (newAppointment) {
           form.reset()
-          router.push(`/patients/${userId}/new-appointment/success?appointmentId=${appointment?.$id}`)
+          router.push(`/patients/${userId}/new-appointment/success?appointmentId=${newAppointment.$id}`)
         
         }
       } else {
