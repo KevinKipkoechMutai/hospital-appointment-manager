@@ -2,15 +2,23 @@ import { Button } from "@/components/ui/button"
 import { Doctors } from "@/constants"
 import { getAppointment } from "@/lib/actions/appointment.actions"
 import { formatDateTime } from "@/lib/utils"
+
 import Image from "next/image"
 import Link from "next/link"
 
 
-const Success = async ({ params: { userId }, searchParams }: SearchParamProps) => {
+const Success = async ({
+  searchParams,
+  params: { userId },
+}: SearchParamProps) => {
 
-  const appointmentId = (searchParams?.appointmentId as string) || ''
+  const appointmentId = (searchParams?.appointmentId as string) || ""
   const appointment = await getAppointment(appointmentId)
   const doctor = Doctors.find((doc) => doc.name === appointment?.primaryPhysician)
+
+  // console.log("appointmentId:", appointmentId)
+  // console.log("appointment:", appointment)
+  // console.log("doctor:", doctor)
 
 
   return (
