@@ -12,6 +12,8 @@ const Admin = async () => {
 
     const appointments = await getRecentAppointmentList()
 
+    // console.log(appointments)
+
     
 
   return (
